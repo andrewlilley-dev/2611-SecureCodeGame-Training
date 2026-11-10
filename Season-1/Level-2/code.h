@@ -55,6 +55,15 @@ int create_user_account(bool isAdmin, const char *username) {
         return INVALID_USER_ID;
     }    
     ua = malloc(sizeof (user_account));
+
+    //Checks size of struct and struct elements
+    printf("ua Size: %lu \n", sizeof (user_account));
+
+    printf("ua.isadmin Size: %lu \n", sizeof (sizeof(((user_account){}).isAdmin)));
+    printf("ua.userId Size: %lu \n", sizeof (sizeof(((user_account){}).userid)));
+    printf("ua.username Size: %lu \n", sizeof (sizeof(((user_account){}).username)));
+    printf("ua.setting Size: %lu \n \n", sizeof (sizeof(((user_account){}).setting)));
+
     if (ua == NULL) {
         fprintf(stderr, "malloc failed to allocate memory");
         return INVALID_USER_ID;
@@ -75,14 +84,33 @@ bool update_setting(int user_id, const char *index, const char *value) {
 
     char *endptr;
     long i, v;
-    i = strtol(index, &endptr, 10);
+
+    i = strtol(index, &endptr, 10); 
+
+    printf("strtol Output: %ld \n",i);
+
     if (*endptr)
         return false;
 
     v = strtol(value, &endptr, 10);
-    if (*endptr || i >= SETTINGS_COUNT)
+
+    printf("strtol value output: %ld \n \n",v);
+    printf("account value output: %ld \n \n", accounts[user_id]->setting[i]);
+    
+    printf("isAdmin value output: %ld \n",accounts[user_id]->isAdmin);
+    printf("isuser value output: %ld \n",accounts[user_id]->userid);
+    printf("username output: %ld \n",accounts[user_id]->username);
+    printf("settings output: %ld \n \n",accounts[user_id]->setting);
+
+    if (i < 0 || i >= SETTINGS_COUNT)
         return false;
     accounts[user_id]->setting[i] = v;
+
+    printf("After Assignment:");
+    printf("isAdmin value output: %ld \n",accounts[user_id]->isAdmin);
+    printf("isuser value output: %ld \n",accounts[user_id]->userid);
+    printf("username output: %ld \n",accounts[user_id]->username);
+    printf("settings output: %ld \n \n",accounts[user_id]->setting);
     return true;
 }
 
