@@ -21,12 +21,13 @@ class TestDatabase(unittest.TestCase):
         actual_output = op.get_stock_info('MSFT')
         self.assertEqual(actual_output, expected_output)
 
-    # tests for correct defense against SQLi in the case where a user passes more than one query or restricted characters
+    # rejects a stock symbol containing an attempted SQL injection
     def test_2(self):
         op = c.DB_CRUD_ops()
-        expected_output = "[METHOD EXECUTED] get_stock_info\n[QUERY] SELECT * FROM stocks WHERE symbol = 'MSFT'; UPDATE stocks SET price = '500' WHERE symbol = 'MSFT'--'\nCONFIRM THAT THE ABOVE QUERY IS NOT MALICIOUS TO EXECUTE"
-        actual_output = op.get_stock_info("MSFT'; UPDATE stocks SET price = '500' WHERE symbol = 'MSFT'--")
-        self.assertEqual(actual_output, expected_output)
+        price_before = op.get_stock_price('MSFT')
+        with self.assertRaisesRegex(ValueError, "Inputted stock symbol is not valid"):
+            op.get_stock_info("MSFT'; UPDATE stocks SET price = '500' WHERE symbol = 'MSFT'--")
+        self.assertEqual(op.get_stock_price('MSFT'), price_before)
 
     # tests for correct retrieval of stock price
     def test_3(self):
