@@ -4,6 +4,8 @@
 
 import os
 from flask import Flask, request
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
 ### Unrelated to the exercise -- Starts here -- Please ignore
 app = Flask(__name__)
@@ -14,13 +16,24 @@ def source():
 ### Unrelated to the exercise -- Ends here -- Please ignore
 
 class TaxPayer:
+    _hasher = PasswordHasher()
 
-    def __init__(self, username, password):
+    def __init__(self, username, raw_password):
         self.username = username
-        self.password = password
+        self.password_hash = self._hasher.hash(raw_password)
         self.prof_picture = None
         self.tax_form_attachment = None
 
+    def verify_password(self, candidate_password: str) -> bool:
+        try:
+            if self._hasher.verify(self.password_hash, candidate_password):
+                if self._hasher.check_needs_rehash(self.password_hash):
+                    self.password_hash = self._hasher.hash(candidate_password)
+                return True
+        except VerifyMismatchError:
+            return False
+        return False
+    
     def base_path_checker(self, path):
         base_dir = os.path.realpath(os.getcwd())
         requested_path = os.path.realpath(path)
